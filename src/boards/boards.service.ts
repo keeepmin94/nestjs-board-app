@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Board, BoardStatus } from './board.model';
 import { v1 as uuid } from 'uuid'; //v1 버젼 쓴다 (uuid란 이름으로 쓰겠다)
+import { CreateBoardDto } from './dto/create-board.dto';
 
 @Injectable()
 export class BoardsService {
@@ -10,7 +11,14 @@ export class BoardsService {
     return this.boards;
   }
 
-  createBoard(title: string, description: string) {
+  getBoardById(id: string): Board {
+    return this.boards.find((board) => board.id === id);
+  }
+
+  createBoard(createBoardDto: CreateBoardDto) {
+    // const title = createBoardDto.title;
+    // const {title} = createBoardDto;
+    const { title, description } = createBoardDto;
     const board: Board = {
       id: uuid(),
       title, // == title: title,
