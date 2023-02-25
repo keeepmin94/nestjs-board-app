@@ -12,9 +12,14 @@ export class BoardsService {
     @InjectRepository(Board) //https://www.inflearn.com/questions/651328/typeorm-db-%EC%97%B0%EA%B2%B0-%EC%98%A4%EB%A5%98%EC%9E%85%EB%8B%88%EB%8B%A4
     private boardRepository: BoardRepository,
   ) {}
+
+  async getAllBoards(): Promise<Board[]> {
+    return this.boardRepository.find();
+  }
   // getAllBoards(): Board[] {
   //   return this.boards;
   // }
+
   async getBoardById(id: number): Promise<Board> {
     const found = await this.boardRepository.findOne(id);
     //const found = await this.boardRepository.findOne({ where: { id } }); //$ npm install typeorm@0.2  명령어를 통해서 공식문서에서 권장하는 버전으로 변경 부탁드립니다.
@@ -72,6 +77,13 @@ export class BoardsService {
   //   const found = this.getBoardById(id);
   //   this.boards = this.boards.filter((board) => board.id !== found.id);
   // }
+
+  async updateBoardStatus(id: number, status: BoardStatus): Promise<Board> {
+    const board = await this.getBoardById(id);
+    board.status = status;
+    await this.boardRepository.save(board);
+    return board;
+  }
   // updateBoardStatus(id: string, status: BoardStatus): Board {
   //   const board = this.getBoardById(id);
   //   board.status = status;
