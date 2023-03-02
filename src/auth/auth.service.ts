@@ -53,7 +53,7 @@ export class AuthService {
       const payload = { username }; //payload는 중요한정보 X
       const accessToken = await this.jwtService.sign(payload);
 
-      return { accessToken };
+      return { accessToken: accessToken };
     } else {
       throw new UnauthorizedException(`login failed`);
     }
