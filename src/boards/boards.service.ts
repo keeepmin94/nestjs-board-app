@@ -5,6 +5,7 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardRepository } from './board.repository';
 import { Board } from './board.entity';
+import { User } from 'src/auth/user.entity';
 
 @Injectable()
 export class BoardsService {
@@ -13,8 +14,14 @@ export class BoardsService {
     private boardRepository: BoardRepository,
   ) {}
 
-  async getAllBoards(): Promise<Board[]> {
-    return this.boardRepository.find();
+  async getAllBoards(user: User): Promise<Board[]> {
+    const query = this.boardRepository.createQueryBuilder('board');
+    query.where('board.userId = :userId', { userId: user.id });
+
+    const boards = await query.getMany();
+
+    return boards;
+    //return this.boardRepository.find();
   }
   // getAllBoards(): Board[] {
   //   return this.boards;
@@ -37,7 +44,10 @@ export class BoardsService {
   //   return found;
   // }
 
-  async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
+  async createBoard(
+    createBoardDto: CreateBoardDto,
+    user: User,
+  ): Promise<Board> {
     //return this.boardRepository.createBoard(createBoardDto); //typeorm 0.3에서부터는 deprecated 되어 동작하지 않는다고 합니다. 데이터 베이스 관련 로직을 레퍼지토리로 옮기지 마시고 서비스에서 처리하면 해결될 듯 합니다.
     //https://velog.io/@wonjun1995/NestJS9.x.x-TypeORM0.3.x%EC%97%90%EC%84%9C-customRepository-%EC%89%BD%EA%B2%8C-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0
     const { title, description } = createBoardDto;
@@ -46,6 +56,7 @@ export class BoardsService {
       title,
       description,
       status: BoardStatus.PUBLIC,
+      user: user,
     });
 
     await this.boardRepository.save(board);
@@ -65,8 +76,8 @@ export class BoardsService {
   //   this.boards.push(board);
   //   return board;
   // }
-  async deleteBoard(id: number): Promise<void> {
-    const result = await this.boardRepository.delete(id);
+  async deleteBoard(id: number, user: User): Promise<void> {
+    const result = await this.boardRepository.delete({ id: id, user: user });
 
     //지우려는 자료가 없을때
     if (result.affected === 0) {
